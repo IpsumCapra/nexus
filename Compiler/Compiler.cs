@@ -25,6 +25,26 @@ namespace Compiler
             return char.IsLetterOrDigit(c) || c == '_';
         }
 
+        private static string SolveArithmetic(string p1, string p2, string op)
+        {
+            switch (op)
+            {
+                case ADDITION:
+                    return (int.Parse(p1) + int.Parse(p2)).ToString();
+                case SUBTRACTION:
+                    return (int.Parse(p1) - int.Parse(p2)).ToString();
+                case MULTIPLICATION:
+                    return (int.Parse(p1) * int.Parse(p2)).ToString();
+                case DIVISION:
+                    return (int.Parse(p1) / int.Parse(p2)).ToString();
+                case MODULO:
+                    return (int.Parse(p1) % int.Parse(p2)).ToString();
+                default:
+                    Console.WriteLine("Error: Unknown operator \'" + op + "\'");
+                    return NULL;
+            }              
+        }
+
         public static string Solve(string toSolve)
         {
             Console.WriteLine("Solving: " + toSolve);
@@ -57,7 +77,7 @@ namespace Compiler
                 if (depth != 0)
                 {
                     Console.WriteLine("Error: Uneven amount of parentheses.");
-                    return "null";
+                    return NULL;
                     //TODO: Error handling.
                 }
             }
@@ -103,7 +123,7 @@ namespace Compiler
                 }
                 else if (!isWhitespace)
                 {
-                    if (!isGeneric && (i == toSolve.Length - 1 || IsGeneric(toSolve[i + 1]) || char.IsWhiteSpace(toSolve[i + 1])))
+                    if (!isGeneric && (i == toSolve.Length - 1 || IsGeneric(toSolve[i + 1]) || char.IsWhiteSpace(toSolve[i + 1]) || toSolve[i + 1].ToString() == NOT))
                     {
                         symbols.Add(c.ToString());
                     }
@@ -136,7 +156,7 @@ namespace Compiler
             // Solve logic
 
             // Assign variables.
-            return "null";
+            return NULL;
         }
     }
 }
