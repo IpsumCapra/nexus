@@ -53,5 +53,6 @@ namespace Compiler
         
         // Misc
         public static string[] ENCLOSURES = {DEFINITION_OPEN, DEFINITION_CLOSE, LIST_OPEN, LIST_CLOSE};
+        public static string[] OPERATORS = {ADDITION, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO};
     }
 }
