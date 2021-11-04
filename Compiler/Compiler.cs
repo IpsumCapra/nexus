@@ -16,7 +16,7 @@ namespace Compiler
 
             foreach (string line in lines)
             {
-                Console.WriteLine(Solve(line));
+                Console.WriteLine("Result: " + Solve(line));
             }
         }
 
@@ -81,14 +81,14 @@ namespace Compiler
                     //TODO: Error handling.
                 }
             }
-            
+
             // Determine symbols.
             List<String> symbols = new List<string>();
             string currentSymbol = "";
             for (int i = 0; i < toSolve.Length; i++)
             {
                 char c = toSolve[i];
-                
+
                 bool isWhitespace = char.IsWhiteSpace(c);
                 bool isGeneric = char.IsLetterOrDigit(c) || c == '_';
                 bool isEnclosure = ENCLOSURES.Contains(c.ToString());
@@ -102,28 +102,39 @@ namespace Compiler
                         currentSymbol = "";
                         continue;
                     }
+
                     symbols.Add(currentSymbol);
                     currentSymbol = "";
 
                     if (isEnclosure)
                     {
                         symbols.Add(c.ToString());
+                        continue;
                     }
-                    
+
                     if (c.ToString() == NOT && toSolve[i + 1].ToString() != EQUALS)
                     {
                         symbols.Add(c.ToString());
                         continue;
                     }
-                    
+
                     if (c.ToString() == EQUALS && toSolve[i + 1].ToString() != EQUALS)
                     {
                         symbols.Add(c.ToString());
+                        continue;
+                    }
+
+                    if (OPERATORS.Contains(c.ToString()) && toSolve[i + 1].ToString() != EQUALS)
+                    {
+                        symbols.Add(c.ToString());
+                        continue;
                     }
                 }
-                else if (!isWhitespace)
+
+                if (!isWhitespace)
                 {
-                    if (!isGeneric && (i == toSolve.Length - 1 || IsGeneric(toSolve[i + 1]) || char.IsWhiteSpace(toSolve[i + 1]) || toSolve[i + 1].ToString() == NOT))
+                    if (!isGeneric && (i == toSolve.Length - 1 || IsGeneric(toSolve[i + 1]) ||
+                                       char.IsWhiteSpace(toSolve[i + 1]) || toSolve[i + 1].ToString() == NOT))
                     {
                         symbols.Add(c.ToString());
                     }
@@ -135,28 +146,81 @@ namespace Compiler
 
             }
 
-            symbols.Add(currentSymbol);
-            foreach (string symbol in symbols)
-            {
-                Console.WriteLine(symbol);
-            }
-            Console.WriteLine("---");
+            if (!string.IsNullOrEmpty(currentSymbol))
+                symbols.Add(currentSymbol);
+            
+            // foreach (string symbol in symbols)
+            // {
+            //     Console.WriteLine(symbol);
+            // }
+            //
+            // Console.WriteLine("---");
 
             // Solve functions.
 
-            // Solve multiplications.
+            // Solve multiplications, divisions, and modulo.
+            for (int i = 1; i < symbols.Count; i++)
+            {
+                if (symbols[i] == MULTIPLICATION || symbols[i] == DIVISION || symbols[i] == MODULO)
+                {
+                    string result = NULL;
+                    switch (symbols[i])
+                    {
+                        case MULTIPLICATION:
+                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], MULTIPLICATION);
+                            break;
+                        case DIVISION:
+                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], DIVISION);
+                            break;
+                        case MODULO:
+                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], MODULO);
+                            break;
+                    }
 
-            // Solve divisions.
+                    symbols.RemoveRange(i - 1, 3);
+                    symbols.Insert(i - 1, result);
+                    i -= 1;
+                }
+            }
 
-            // Solve additions.
+            // Solve additions and subtractions.
+            for (int i = 1; i < symbols.Count; i++)
+            {
+                if (symbols[i] == ADDITION || symbols[i] == SUBTRACTION)
+                {
+                    string result = NULL;
+                    switch (symbols[i])
+                    {
+                        case ADDITION:
+                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], ADDITION);
+                            break;
+                        case SUBTRACTION:
+                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], SUBTRACTION);
+                            break;
+                    }
 
-            // Solve subtractions.
-
+                    symbols.RemoveRange(i - 1, 3);
+                    symbols.Insert(i - 1, result);
+                    i -= 1;
+                }
+            }
 
             // Solve logic
 
             // Assign variables.
-            return NULL;
+
+            // foreach (string symbol in symbols)
+            // {
+            //     Console.WriteLine(symbol);
+            // }
+            // Console.WriteLine("---");
+            
+            if (symbols.Count > 1)
+            {
+                Console.WriteLine("Error: Computation error.");
+                return NULL;
+            }
+            return symbols[0];
         }
     }
 }
