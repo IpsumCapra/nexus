@@ -47,5 +47,8 @@ namespace Compiler
         // Variables
         public static string LIST_OPEN = "[";
         public static string LIST_CLOSE = "]";
+        
+        // Misc
+        public static string[] ENCLOSURES = {DEFINITION_OPEN, DEFINITION_CLOSE, LIST_OPEN, LIST_CLOSE};
     }
 }
