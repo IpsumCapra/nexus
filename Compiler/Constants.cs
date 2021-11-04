@@ -43,5 +43,9 @@ namespace Compiler
         
         // One Input Logic Operators
         public static string NOT = "!";
+        
+        // Variables
+        public static string LIST_OPEN = "[";
+        public static string LIST_CLOSE = "]";
     }
 }
