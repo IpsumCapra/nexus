@@ -2,6 +2,16 @@ namespace Compiler
 {
     public static class Constants
     {
+        // Order Control
+        public static string LINE_TERMINATOR = ";";
+        public static string ORDER_CONTROL_OPEN = "(";
+        public static string ORDER_CONTROL_CLOSE = ")";
+        public static string DEFINITION_OPEN = "{";
+        public static string DEFINITION_CLOSE = "}";
+        
+        // Comments
+        public static string COMMENT = "//";
+        
         // Two Input Arithmetic Operators
         public static string ADDITION = "+";
         public static string SUBTRACTION = "-";
