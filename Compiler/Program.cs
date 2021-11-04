@@ -4,6 +4,7 @@
     {
         public static void Main(string[] args)
         {
+            Compiler.Compile("1 \n  + 1");
         }
     }
 }
