@@ -30,15 +30,15 @@ namespace Compiler
             switch (op)
             {
                 case ADDITION:
-                    return (int.Parse(p1) + int.Parse(p2)).ToString();
+                    return (float.Parse(p1) + float.Parse(p2)).ToString();
                 case SUBTRACTION:
-                    return (int.Parse(p1) - int.Parse(p2)).ToString();
+                    return (float.Parse(p1) - float.Parse(p2)).ToString();
                 case MULTIPLICATION:
-                    return (int.Parse(p1) * int.Parse(p2)).ToString();
+                    return (float.Parse(p1) * float.Parse(p2)).ToString();
                 case DIVISION:
-                    return (int.Parse(p1) / int.Parse(p2)).ToString();
+                    return (float.Parse(p1) / float.Parse(p2)).ToString();
                 case MODULO:
-                    return (int.Parse(p1) % int.Parse(p2)).ToString();
+                    return (float.Parse(p1) % float.Parse(p2)).ToString();
                 default:
                     Console.WriteLine("Error: Unknown operator \'" + op + "\'");
                     return NULL;
@@ -70,6 +70,7 @@ namespace Compiler
                         {
                             string solvedPart = Solve(toSolve.Substring(start + 1, i - start - 1));
                             toSolve = toSolve.Remove(start, i - start + 1).Insert(start, solvedPart);
+                            i = start;
                         }
                     }
                 }
@@ -148,15 +149,21 @@ namespace Compiler
 
             if (!string.IsNullOrEmpty(currentSymbol))
                 symbols.Add(currentSymbol);
-            
-            // foreach (string symbol in symbols)
-            // {
-            //     Console.WriteLine(symbol);
-            // }
-            //
-            // Console.WriteLine("---");
 
             // Solve functions.
+            
+            // Unary functions
+            for (int i = 0; i < symbols.Count; i++)
+            {
+                if (symbols[i] == SUBTRACTION)
+                {
+                    if (i == 0 || !char.IsLetterOrDigit(symbols[i - 1][0]))
+                    {
+                        symbols.RemoveAt(i);
+                        symbols[i] = SUBTRACTION + symbols[i];
+                    } 
+                }
+            }
 
             // Solve multiplications, divisions, and modulo.
             for (int i = 1; i < symbols.Count; i++)
@@ -209,14 +216,18 @@ namespace Compiler
 
             // Assign variables.
 
-            // foreach (string symbol in symbols)
-            // {
-            //     Console.WriteLine(symbol);
-            // }
-            // Console.WriteLine("---");
+            foreach (string symbol in symbols)
+            {
+                Console.WriteLine(symbol);
+            }
+            Console.WriteLine("---");
             
             if (symbols.Count > 1)
             {
+                if (symbols.Count == 2 && symbols[0] == SUBTRACTION && float.TryParse(symbols[1], out var result))
+                {
+                    return (-result).ToString();
+                }
                 Console.WriteLine("Error: Computation error.");
                 return NULL;
             }
