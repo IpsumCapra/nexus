@@ -216,19 +216,8 @@ namespace Compiler
             {
                 if (symbols[i] == MULTIPLICATION || symbols[i] == DIVISION || symbols[i] == MODULO)
                 {
-                    string result = NULL;
-                    switch (symbols[i])
-                    {
-                        case MULTIPLICATION:
-                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], MULTIPLICATION);
-                            break;
-                        case DIVISION:
-                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], DIVISION);
-                            break;
-                        case MODULO:
-                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], MODULO);
-                            break;
-                    }
+                    string result;
+                    result = SolveArithmetic(symbols[i - 1], symbols[i + 1], symbols[i]);
 
                     symbols.RemoveRange(i - 1, 3);
                     symbols.Insert(i - 1, result);
@@ -241,17 +230,8 @@ namespace Compiler
             {
                 if (symbols[i] == ADDITION || symbols[i] == SUBTRACTION)
                 {
-                    string result = NULL;
-                    switch (symbols[i])
-                    {
-                        case ADDITION:
-                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], ADDITION);
-                            break;
-                        case SUBTRACTION:
-                            result = SolveArithmetic(symbols[i - 1], symbols[i + 1], SUBTRACTION);
-                            break;
-                    }
-
+                    string result;
+                    result = SolveArithmetic(symbols[i - 1], symbols[i + 1], symbols[i]);
                     symbols.RemoveRange(i - 1, 3);
                     symbols.Insert(i - 1, result);
                     i -= 1;
@@ -272,18 +252,54 @@ namespace Compiler
                 }
             }
 
-            // Binary comparison functions
-            for (int i = 0; i < symbols.Count; i++)
+            // Binary comparison functions - numeric
+            //TODO: String comparison.
+            for (int i = 1; i < symbols.Count; i++)
             {
                 if (BINARY_LOGIC.Contains(symbols[i]))
                 {
+                    bool isNumberComparison = char.IsDigit(symbols[i - 1][0]);
                     string result = NULL;
-                    switch (symbols[i])
-                    {
-                        case GREATER_THAN:
-                            result = SolveLogic();
-                            break;
-                    }
+
+                    if (isNumberComparison)
+                        result = SolveComparisons(symbols[i-1], symbols[i+1], symbols[i]);
+                    else
+                        continue;
+
+                    symbols.RemoveRange(i - 1, 3);
+                    symbols.Insert(i - 1, result);
+                    i -= 1;
+                }
+            }
+            
+            // Binary logic comparison.
+            for (int i = 1; i < symbols.Count; i++)
+            {
+                if (symbols[i] == EQUALS_TO || symbols[i] == NOT_EQUALS_TO)
+                {
+                    bool isNumberComparison = char.IsDigit(symbols[i - 1][0]);
+                    string result = NULL;
+
+                    if (!isNumberComparison)
+                        result = SolveLogic(symbols[i-1], symbols[i+1], symbols[i]);
+                    else
+                        continue;
+
+                    symbols.RemoveRange(i - 1, 3);
+                    symbols.Insert(i - 1, result);
+                    i -= 1;
+                }
+            }
+            
+            // AND and OR
+            for (int i = 1; i < symbols.Count; i++)
+            {
+                if (symbols[i] == AND || symbols[i] == OR)
+                {
+                    bool isNumberComparison = char.IsDigit(symbols[i - 1][0]);
+                    string result = NULL;
+                    
+                    result = SolveLogic(symbols[i-1], symbols[i+1], symbols[i]);
                     
                     symbols.RemoveRange(i - 1, 3);
                     symbols.Insert(i - 1, result);
