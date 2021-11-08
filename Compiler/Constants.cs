@@ -50,9 +50,13 @@ namespace Compiler
         
         // Constants
         public const string NULL = "null";
+        public const string TRUE = "true";
+        public const string FALSE = "false";
         
         // Misc
         public static string[] ENCLOSURES = {DEFINITION_OPEN, DEFINITION_CLOSE, LIST_OPEN, LIST_CLOSE};
         public static string[] OPERATORS = {ADDITION, SUBTRACTION, MULTIPLICATION, DIVISION, MODULO};
+
+        public static string[] BINARY_LOGIC = {EQUALS_TO, NOT_EQUALS_TO, GREATER_THAN, GREATER_THAN_EQUAL_TO, LESS_THAN, LESS_THAN_EQUAL_TO};
     }
 }
