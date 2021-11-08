@@ -10,13 +10,15 @@ namespace Compiler
         public static void Compile(string toCompile)
         {
             //TODO: Purge comments.
-            
+
+            Dictionary<string, string> variables = new Dictionary<string, string>();
+
             // Split into lines of code, based on line termination character.
             string[] lines = toCompile.Split(new [] {LINE_TERMINATOR}, StringSplitOptions.None);
 
             foreach (string line in lines)
             {
-                Console.WriteLine("Result: " + Solve(line));
+                Console.WriteLine("Result: " + Solve(line, ref variables));
             }
         }
 
@@ -25,6 +27,21 @@ namespace Compiler
             return char.IsLetterOrDigit(c) || c == '_';
         }
 
+        private static bool IsVariable(string name)
+        {
+            bool hasChar = false;
+            foreach (char c in name)
+            {
+                if ((char.IsLetter(c) || c == '_') && !hasChar)
+                    hasChar = true;
+                
+                if (!IsGeneric(c))
+                    return false;
+            }
+
+            if (!hasChar) return false;
+            return true;
+        } 
         private static string SolveArithmetic(string p1, string p2, string op)
         {
             float fp1 = float.Parse(p1);
@@ -91,7 +108,7 @@ namespace Compiler
             }
         }
 
-        public static string Solve(string toSolve)
+        private static string Solve(string toSolve, ref Dictionary<string, string> variables)
         {
             Console.WriteLine("Solving: " + toSolve);
             // Apply PEMDAS.
@@ -114,7 +131,7 @@ namespace Compiler
                         depth--;
                         if (depth == 0)
                         {
-                            string solvedPart = Solve(toSolve.Substring(start + 1, i - start - 1));
+                            string solvedPart = Solve(toSolve.Substring(start + 1, i - start - 1), ref variables);
                             toSolve = toSolve.Remove(start, i - start + 1).Insert(start, solvedPart);
                             i = start;
                         }
@@ -196,6 +213,42 @@ namespace Compiler
             if (!string.IsNullOrEmpty(currentSymbol))
                 symbols.Add(currentSymbol);
 
+            // Determine whether line is assignment. Catch errors.
+            bool isAssign = false;
+            for (int i = 0; i < symbols.Count; i++)
+            {
+                if (symbols[i] == EQUALS)
+                {
+                    if (isAssign || i != 1 || symbols.Count < 3)
+                    {
+                        Console.WriteLine("Error: Bad syntax.");
+                        return NULL;
+                    }
+
+                    isAssign = true;
+                }
+            }
+
+            // Resolve variable definitions.
+            if (variables.Count > 0)
+            {
+                for (int i = isAssign ? 2 : 0; i < symbols.Count; i++)
+                {
+                    if (IsVariable(symbols[i]))
+                    {
+                        if (variables.ContainsKey(symbols[i]))
+                        {
+                            symbols[i] = variables[symbols[i]];
+                        }
+                        else
+                        {
+                            Console.WriteLine("Error: undefined variable \'" + symbols[i] + "\'");
+                            return null;
+                        }
+                    }
+                }
+            }
+
             //TODO: Solve functions.
 
             // Solve multiplications, divisions, and modulo.
@@ -208,9 +261,10 @@ namespace Compiler
                     {
                         symbols.RemoveAt(i);
                         symbols[i] = SUBTRACTION + symbols[i];
-                    } 
+                    }
                 }
             }
+
             // Binary functions
             for (int i = 1; i < symbols.Count; i++)
             {
@@ -262,7 +316,7 @@ namespace Compiler
                     string result = NULL;
 
                     if (isNumberComparison)
-                        result = SolveComparisons(symbols[i-1], symbols[i+1], symbols[i]);
+                        result = SolveComparisons(symbols[i - 1], symbols[i + 1], symbols[i]);
                     else
                         continue;
 
@@ -271,7 +325,7 @@ namespace Compiler
                     i -= 1;
                 }
             }
-            
+
             // Binary logic comparison.
             for (int i = 1; i < symbols.Count; i++)
             {
@@ -281,7 +335,7 @@ namespace Compiler
                     string result = NULL;
 
                     if (!isNumberComparison)
-                        result = SolveLogic(symbols[i-1], symbols[i+1], symbols[i]);
+                        result = SolveLogic(symbols[i - 1], symbols[i + 1], symbols[i]);
                     else
                         continue;
 
@@ -290,7 +344,7 @@ namespace Compiler
                     i -= 1;
                 }
             }
-            
+
             // AND and OR
             for (int i = 1; i < symbols.Count; i++)
             {
@@ -298,34 +352,35 @@ namespace Compiler
                 {
                     bool isNumberComparison = char.IsDigit(symbols[i - 1][0]);
                     string result = NULL;
-                    
-                    result = SolveLogic(symbols[i-1], symbols[i+1], symbols[i]);
-                    
+
+                    result = SolveLogic(symbols[i - 1], symbols[i + 1], symbols[i]);
+
                     symbols.RemoveRange(i - 1, 3);
                     symbols.Insert(i - 1, result);
                     i -= 1;
                 }
             }
-            
-            //TODO: Assign variables.
-            
-            
-            // Log symbols
-            foreach (string symbol in symbols)
+
+            //Assign variables.
+            if (isAssign)
+            {
+                if (variables.ContainsKey(symbols[0]))
+                {
+                    variables[symbols[0]] = variables[symbols[2]];
+                }
+                else
+                {
+                    variables.Add(symbols[0], symbols[2]);
+                }
+                symbols.RemoveRange(0, 2);
+            }
+
+                // Log symbols
+        foreach (string symbol in symbols)
             {
                 Console.WriteLine(symbol);
             }
             Console.WriteLine("---");
-            
-            if (symbols.Count > 1)
-            {
-                if (symbols.Count == 2 && symbols[0] == SUBTRACTION && float.TryParse(symbols[1], out var result))
-                {
-                    return (-result).ToString();
-                }
-                Console.WriteLine("Error: Computation error.");
-                return NULL;
-            }
             return symbols[0];
         }
     }
