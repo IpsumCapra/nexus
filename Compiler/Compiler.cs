@@ -27,22 +27,68 @@ namespace Compiler
 
         private static string SolveArithmetic(string p1, string p2, string op)
         {
+            float fp1 = float.Parse(p1);
+            float fp2 = float.Parse(p2);
             switch (op)
             {
                 case ADDITION:
-                    return (float.Parse(p1) + float.Parse(p2)).ToString();
+                    return (fp1 + fp2).ToString();
                 case SUBTRACTION:
-                    return (float.Parse(p1) - float.Parse(p2)).ToString();
+                    return (fp1 - fp2).ToString();
                 case MULTIPLICATION:
-                    return (float.Parse(p1) * float.Parse(p2)).ToString();
+                    return (fp1 * fp2).ToString();
                 case DIVISION:
-                    return (float.Parse(p1) / float.Parse(p2)).ToString();
+                    return (fp1 / fp2).ToString();
                 case MODULO:
-                    return (float.Parse(p1) % float.Parse(p2)).ToString();
+                    return (fp1 % fp2).ToString();
                 default:
                     Console.WriteLine("Error: Unknown operator \'" + op + "\'");
                     return NULL;
             }              
+        }
+
+        private static string SolveLogic(string p1, string p2, string op)
+        {
+            bool bp1 = bool.Parse(p1);
+            bool bp2 = bool.Parse(p2);
+            switch (op)
+            {
+                case EQUALS_TO:
+                    return (bp1 == bp2).ToString().ToLower();
+                case NOT_EQUALS_TO:
+                    return (bp1 != bp2).ToString().ToLower();
+                case AND:
+                    return (bp1 && bp2).ToString().ToLower();
+                case OR:
+                    return (bp1 || bp2).ToString().ToLower();
+                default:
+                    Console.WriteLine("Error: Unknown logic operator \'" + op + "\'");
+                    return NULL;
+            }
+        }
+
+        private static string SolveComparisons(string p1, string p2, string op)
+        {
+            float bp1 = float.Parse(p1);
+            float bp2 = float.Parse(p2);
+            switch (op)
+            {
+                case EQUALS_TO:
+                    return (bp1.Equals(bp2)).ToString().ToLower();
+                case NOT_EQUALS_TO:
+                    return (!bp1.Equals(bp2)).ToString().ToLower();
+                case GREATER_THAN:
+                    return (bp1 > bp2).ToString().ToLower();
+                case GREATER_THAN_EQUAL_TO:
+                    return (bp1 >= bp2).ToString().ToLower();
+                case LESS_THAN:
+                    return (bp1 < bp2).ToString().ToLower();
+                case LESS_THAN_EQUAL_TO:
+                    return (bp1 <= bp2).ToString().ToLower();
+                default:
+                    Console.WriteLine("Error: Unknown logic operator \'" + op + "\'");
+                    return NULL;
+            }
         }
 
         public static string Solve(string toSolve)
@@ -150,8 +196,9 @@ namespace Compiler
             if (!string.IsNullOrEmpty(currentSymbol))
                 symbols.Add(currentSymbol);
 
-            // Solve functions.
-            
+            //TODO: Solve functions.
+
+            // Solve multiplications, divisions, and modulo.
             // Unary functions
             for (int i = 0; i < symbols.Count; i++)
             {
@@ -164,8 +211,7 @@ namespace Compiler
                     } 
                 }
             }
-
-            // Solve multiplications, divisions, and modulo.
+            // Binary functions
             for (int i = 1; i < symbols.Count; i++)
             {
                 if (symbols[i] == MULTIPLICATION || symbols[i] == DIVISION || symbols[i] == MODULO)
@@ -213,9 +259,42 @@ namespace Compiler
             }
 
             // Solve logic
+            // Unary functions
+            for (int i = 0; i < symbols.Count; i++)
+            {
+                if (symbols[i] == NOT)
+                {
+                    if (symbols[i + 1] == TRUE || symbols[i + 1] == FALSE)
+                    {
+                        symbols.RemoveAt(i);
+                        symbols[i] = (!bool.Parse(symbols[i])).ToString().ToLower();
+                    }
+                }
+            }
 
-            // Assign variables.
-
+            // Binary comparison functions
+            for (int i = 0; i < symbols.Count; i++)
+            {
+                if (BINARY_LOGIC.Contains(symbols[i]))
+                {
+                    string result = NULL;
+                    switch (symbols[i])
+                    {
+                        case GREATER_THAN:
+                            result = SolveLogic();
+                            break;
+                    }
+                    
+                    symbols.RemoveRange(i - 1, 3);
+                    symbols.Insert(i - 1, result);
+                    i -= 1;
+                }
+            }
+            
+            //TODO: Assign variables.
+            
+            
+            // Log symbols
             foreach (string symbol in symbols)
             {
                 Console.WriteLine(symbol);
