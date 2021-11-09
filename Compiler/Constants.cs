@@ -11,6 +11,8 @@ namespace Compiler
         
         // Comments
         public const string COMMENT = "//";
+        public const string INLINE_COMMENT_OPEN = "/*";
+        public const string INLINE_COMMENT_CLOSE = "*/";
         
         // Two Input Arithmetic Operators
         public const string ADDITION = "+";
