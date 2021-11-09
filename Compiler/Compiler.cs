@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using static Compiler.Constants;
 
@@ -7,20 +8,42 @@ namespace Compiler
 {
     public static class Compiler
     {
-        public static void Compile(string toCompile)
+        public static void Compile(string pathToRun)
         {
-            //TODO: Purge comments.
+            string code = File.ReadAllText(pathToRun);
+            
+            // Purge comments.
+            for (int i = 0; i < code.Length - 1; i++)
+            {
+                if ("" + code[i] + code[i + 1] == COMMENT)
+                {
+                    while (code.Length != i && code[i] != '\n')
+                        code = code.Remove(i, 1);
+                    continue;
+                }
+
+                if ("" + code[i] + code[i + 1] == INLINE_COMMENT_OPEN)
+                {
+                    while (code.Length != i + 1 && "" + code[i] + code[i + 1] != INLINE_COMMENT_CLOSE)
+                        code = code.Remove(i, 1);
+                    
+                    code = code.Remove(i, code.Length != i + 1 ? 2 : 1);
+                }
+            }
 
             Dictionary<string, string> variables = new Dictionary<string, string>();
 
             // Split into lines of code, based on line termination character.
-            string[] lines = toCompile.Split(new [] {LINE_TERMINATOR}, StringSplitOptions.None);
+            string[] lines = code.Split(new [] {LINE_TERMINATOR}, StringSplitOptions.None);
 
             foreach (string line in lines)
             {
-                Console.WriteLine("Result: " + Solve(line, ref variables));
+                if (!string.IsNullOrWhiteSpace(line))
+                    Console.WriteLine("Result: " + Solve(line, ref variables));
             }
         }
+        
+        
 
         private static bool IsGeneric(char c)
         {
