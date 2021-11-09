@@ -1,0 +1,9 @@
+// Example 01: Variables
+
+// Assign some variables.
+x = 1; /* This is an inline comment. */
+y = 2;
+z = 3;
+
+// Run an expression.
+(x + y) / z == 1
