@@ -11,4 +11,7 @@ Nexus is written in C#. I hope to use Nexus to create programming games, and to 
 * Control logic - ❌
 * Loops - ❌
 * Functions - ❌
+* Comments - ✔
+  * Line comments - ✔
+  * Block comments - ✔
 * And more...
